@@ -1,0 +1,39 @@
+cabal-version:      2.4
+name:               enc
+version:            0.1.0.0
+
+-- A short (one-line) description of the package.
+-- synopsis:
+
+-- A longer description of the package.
+-- description:
+
+-- A URL where users can report bugs.
+-- bug-reports:
+
+-- The license under which the package is released.
+-- license:
+
+-- The package author(s).
+-- author:
+
+-- An email address to which users can send suggestions, bug reports, and patches.
+-- maintainer:
+
+-- A copyright notice.
+-- copyright:
+-- category:
+extra-source-files: CHANGELOG.md
+
+executable enc
+    main-is:          encryption.hs
+
+    build-depends:    base ^>=4.17.2.0,random,cryptonite>=0.3,base16-bytestring>=1.0.2.0,basement>=0.0.16,memory>=0.18.0,byteable>=0.1.1,time,bytestring,text
+    hs-source-dirs:   app
+    default-language: Haskell2010
+
+executable dec
+    main-is:          decryption.hs
+    build-depends:    base ^>=4.17.2.0,random,cryptonite>=0.3,base16-bytestring>=1.0.2.0,basement>=0.0.16,memory>=0.18.0,byteable>=0.1.1,time,bytestring,text
+    hs-source-dirs:   app
+    default-language: Haskell2010
