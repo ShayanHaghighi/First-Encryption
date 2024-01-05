@@ -31,12 +31,12 @@ This was a fun project I did to test out a simple way of encrypting/decrypting t
 To run the program, use the following command:
 
 ```bash
-cabal run <enc> <string to encrypt>
+cabal run enc <string to encrypt>
 ```
 to encrypt a string and
 
 ```bash
-cabal run <dec> <string to deccrypt>
+cabal run dec <string to deccrypt>
 ```
 to decrypt a string.
 
