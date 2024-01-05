@@ -36,7 +36,7 @@ cabal run enc <string to encrypt>
 to encrypt a string and
 
 ```bash
-cabal run dec <string to deccrypt>
+cabal run dec <string to decrypt>
 ```
 to decrypt a string.
 
