@@ -1,23 +1,12 @@
 import Crypto.Hash
-import qualified Data.ByteString as B
 import qualified Data.ByteString.Char8 as C8
-import Crypto.Hash.Algorithms
-import qualified Data.ByteArray.Encoding as BAE
-import Data.Text.Encoding (decodeUtf8)
-import Crypto.Hash (Digest, SHA256, hash)
 import Data.ByteArray.Encoding (Base(Base16), convertToBase)
 import Data.ByteString.Char8 (unpack)
 import Data.Char
 import Data.Time
-import Data.Time.Format
 import System.IO.Unsafe
-import System.Random
 import Data.Time.Clock.POSIX
-import Control.Monad
-import Data.String (String)
 import System.Environment  
-import Data.List 
---import System.Locale
 
 type Hex = Int
 
@@ -38,7 +27,7 @@ concatStrings (x:xs) = x ++ " " ++ (concatStrings xs)
 ------------------------------Getting the Key-----------------------------------------
 
 
--- Calculate SHA-256 hash
+--Calculate SHA-256 hash
 sha256Hash :: String -> Digest SHA256
 sha256Hash input = hash (C8.pack input)
 
@@ -83,7 +72,7 @@ genList :: [Char]
 genList = makeAlphabet (['A'..'Z']++[' ']) $ modList 27 $ hexToList $ digestToString $ sha256Hash $ getDate $ toString getCurrentDate
 
 
---------------------------Subbing in the key---------------------------------------------
+-- --------------------------Subbing in the key---------------------------------------------
 
 
 substitution :: String -> String -> String
@@ -101,7 +90,7 @@ subKey :: String -> String
 subKey string = substitution string genList
 
 
-------------------------------Getting Date-----------------------------------------
+-- ------------------------------Getting Date-----------------------------------------
 
 
 getCurrentDate :: IO String
@@ -139,48 +128,3 @@ getcharat n (x:xs) = getcharat (n-1) xs
 
 decode :: String -> String
 decode string  = substitution string (getrevkey genList)
-
-
------------------------------------adding salt----------------------------------------------------
-
-noSaltEncode :: String -> String
-noSaltEncode string = [] ++ (subKey string)
-
-getCurrentTimeInSeconds :: IO Integer
-getCurrentTimeInSeconds = do
-    currentTime <- getPOSIXTime
-    return $ round currentTime
-
-toInt :: IO Integer -> Int
-toInt ioInteger = unsafePerformIO $ do
-    integerVal <- ioInteger
-    return $ fromIntegral integerVal
- 
-generateRandomNumber :: Int
-generateRandomNumber = let
-    gen = mkStdGen (toInt getCurrentTimeInSeconds)
-    (randomNum, _) = randomR (1, 100) gen
-    in randomNum
-    
-salt :: [Hex]
-salt = hexToList $ digestToString $ sha256Hash $ show $ toInt $ getCurrentTimeInSeconds
-
-saltLength :: Hex -> Int -> Int
-saltLength x n = if (x `mod` (n*2)) < n then (x `mod` (n*2)) + n else x `mod` n*2
-
-createSalt :: Int -> [Hex] -> String
-createSalt 0 _ = []
-createSalt y [] = createSalt y (reverse salt)
-createSalt y (x:xs) = (getRandomChar x):(createSalt (y-1) (xs))
-
-getRandomChar :: Int -> Char
-getRandomChar x = (['a'..'z']++[' ']++['A'..'Z']) !! (x `mod` 53)                     -----Character list used here
-
-finalSalt :: String -> String
-finalSalt string = createSalt (saltLength (salt !! 0) (length string)) salt ++ string ++ createSalt (saltLength(salt !! 1) (length string)) (reverse salt)
-
-encode :: String -> String
-encode string = finalSalt (noSaltEncode ([' '] ++ string ++ [' ']))
-
-nFun :: String -> String
-nFun (x:xs) = xs

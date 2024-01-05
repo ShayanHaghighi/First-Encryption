@@ -1,31 +1,21 @@
 import Crypto.Hash
-import qualified Data.ByteString as B
 import qualified Data.ByteString.Char8 as C8
-import Crypto.Hash.Algorithms
-import qualified Data.ByteArray.Encoding as BAE
-import Data.Text.Encoding (decodeUtf8)
-import Crypto.Hash (Digest, SHA256, hash)
 import Data.ByteArray.Encoding (Base(Base16), convertToBase)
 import Data.ByteString.Char8 (unpack)
 import Data.Char
 import Data.Time
-import Data.Time.Format
 import System.IO.Unsafe
 import System.Random
 import Data.Time.Clock.POSIX
-import Control.Monad
-import Data.String (String)
-import System.Environment  
-import Data.List  
+import System.Environment
 
---import System.Locale
 
 type Hex = Int
 
 --module encryption where
 
 main :: IO ()
-main = do 
+main = do
         args <- getArgs
         putStrLn $ encode (concatStrings args)
 
@@ -108,36 +98,14 @@ getCurrentDate = do
     now <- getCurrentTime
     let formattedDate = formatTime defaultTimeLocale "%Y-%m-%d" now
     return formattedDate
-   
+
 toString :: IO String -> String
 toString ioStr = unsafePerformIO ioStr
-   
+
 getDate :: String -> String
 getDate [] = []
-getDate (xs) = (xs !! 8):(xs !! 9):(xs !! 5):(xs !! 6):(xs !! 0):(xs !! 1):(xs !! 2):(xs !! 3):[]
+getDate (xs) = [(xs !! 8), (xs !! 9), (xs !! 5), (xs !! 6), (xs !! 0), (xs !! 1), (xs !! 2), (xs !! 3)]
 
-
-
-
-------------------------------Decoding-----------------------------------------
-
-getrevkey :: String -> String
-getrevkey [] = []
-getrevkey a = getkey a (['A' .. 'Z']++[' '])                      -----Character list used here
-
-
-getkey _ [] = []
-getkey key (y:ys) = [getcharat (whereis y key) (['A' .. 'Z']++[' '])] ++ (getkey key ys)    -----Character list used here
-
-whereis :: Char -> String -> Int
-whereis a key = if (head key) == a then 0 else (1 + (whereis a (tail key)))
-
-getcharat :: Int -> String -> Char
-getcharat 0 (x:xs) = x
-getcharat n (x:xs) = getcharat (n-1) xs
-
-decode :: String -> String
-decode string  = substitution string (getrevkey genList)
 
 
 -----------------------------------adding salt----------------------------------------------------
@@ -147,22 +115,20 @@ noSaltEncode string = [] ++ (subKey string)
 
 getCurrentTimeInSeconds :: IO Integer
 getCurrentTimeInSeconds = do
-    currentTime <- getPOSIXTime
-    return $ round currentTime
+                            round <$> getPOSIXTime
 
 toInt :: IO Integer -> Int
 toInt ioInteger = unsafePerformIO $ do
-    integerVal <- ioInteger
-    return $ fromIntegral integerVal
- 
+                                        fromIntegral <$> ioInteger
+
 generateRandomNumber :: Int
 generateRandomNumber = let
     gen = mkStdGen (toInt getCurrentTimeInSeconds)
     (randomNum, _) = randomR (1, 100) gen
     in randomNum
-    
+
 salt :: [Hex]
-salt = hexToList $ digestToString $ sha256Hash $ show $ toInt $ getCurrentTimeInSeconds
+salt = hexToList $ digestToString $ sha256Hash $ show $ toInt getCurrentTimeInSeconds
 
 saltLength :: Hex -> Int -> Int
 saltLength x n = if (x `mod` (n*2)) < n then (x `mod` (n*2)) + n else x `mod` n*2
@@ -176,10 +142,7 @@ getRandomChar :: Int -> Char
 getRandomChar x = (['a'..'z']++[' ']++['A'..'Z']) !! (x `mod` 53)                     -----Character list used here
 
 finalSalt :: String -> String
-finalSalt string = createSalt (saltLength (salt !! 0) (length string)) salt ++ string ++ createSalt (saltLength(salt !! 1) (length string)) (reverse salt)
+finalSalt string = createSalt (saltLength (head salt) (length string)) salt ++ string ++ createSalt (saltLength (salt !! 1) (length string)) (reverse salt)
 
 encode :: String -> String
 encode string = finalSalt (noSaltEncode ([' '] ++ string ++ [' ']))
-
-nFun :: String -> String
-nFun (x:xs) = xs
