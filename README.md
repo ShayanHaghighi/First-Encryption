@@ -39,3 +39,5 @@ to encrypt a string and
 cabal run <dec> <string to deccrypt>
 ```
 to decrypt a string.
+
+**Note:** The command may take longer on the first time as the cabal manager needs to resolve the program's dependencies.
