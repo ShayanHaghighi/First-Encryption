@@ -1,4 +1,4 @@
-# Encryption-Example
+# First-Encryption
 
 This was a fun project I did to test out a simple way of encrypting/decrypting text.
 
